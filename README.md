@@ -1,15 +1,21 @@
 # Flexarr for Home Assistant
 
+A Home Assistant integration for [Flexarr](https://github.com/danleach-glitch/flexarr), the media server.
+
 Every Apple TV, iPhone and iPad signed in to Flexarr becomes a media player in Home Assistant, and everything that plays (on those devices or in a browser) fires an event you can automate on: dim the lights when a film starts, bring them up when the credits roll.
 
 ## Install
 
-Copy `custom_components/flexarr` into your Home Assistant `config/custom_components/` folder and restart Home Assistant. (It will move to its own repository for HACS once it's settled.)
+With [HACS](https://hacs.xyz): **HACS › ⋮ › Custom repositories**, add `https://github.com/danleach-glitch/flexarr-home-assistant` as an *Integration*, then find **Flexarr** in HACS, download it and restart Home Assistant.
+
+Or by hand: copy `custom_components/flexarr` into your Home Assistant `config/custom_components/` folder and restart.
 
 Then **Settings › Devices & services › Add integration › Flexarr**, and enter:
 
 - **Server address**: where Flexarr's web app is, for example `http://192.168.1.20:8383`.
 - **API key**: from **Settings › Access** in Flexarr.
+
+It needs Flexarr 0.45.0 or later, which has the event stream it follows.
 
 ## What you get
 
@@ -84,3 +90,7 @@ Tests run with [pytest-homeassistant-custom-component](https://github.com/Matthe
 uv venv --python 3.13 && uv pip install pytest-homeassistant-custom-component
 .venv/bin/python -m pytest
 ```
+
+## Licence
+
+[PolyForm Noncommercial 1.0.0](LICENSE), as Flexarr itself.
