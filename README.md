@@ -93,4 +93,4 @@ uv venv --python 3.13 && uv pip install pytest-homeassistant-custom-component
 
 ## Licence
 
-[PolyForm Noncommercial 1.0.0](LICENSE), as Flexarr itself.
+[MIT](LICENSE). This covers the integration only; Flexarr itself is under [PolyForm Noncommercial 1.0.0](https://github.com/danleach-glitch/flexarr/blob/main/LICENSE).
