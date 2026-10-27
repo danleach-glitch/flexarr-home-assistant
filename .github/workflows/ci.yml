@@ -38,5 +38,6 @@ jobs:
       - uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa # main
         with:
           category: integration
-          # Not in Home Assistant's brands repository yet.
-          ignore: brands
+          # Not in Home Assistant's brands repository yet, and GitHub doesn't recognise the PolyForm licence (it
+          # reports NOASSERTION). Both only matter for HACS's default store; custom-repository installs work.
+          ignore: brands license
