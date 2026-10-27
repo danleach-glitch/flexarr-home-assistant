@@ -1,0 +1,43 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Flexarr",
+        "description": "The server's address and its API key, from Settings › Access in Flexarr.",
+        "data": {
+          "url": "Server address",
+          "api_key": "API key"
+        },
+        "data_description": {
+          "url": "For example http://192.168.1.20:8383",
+          "api_key": "Shown under Settings › Access in Flexarr's web app."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Flexarr's API key changed",
+        "description": "Enter the new API key from Settings › Access in Flexarr.",
+        "data": {
+          "api_key": "API key"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Couldn't reach Flexarr at that address.",
+      "invalid_auth": "Flexarr didn't accept that API key."
+    },
+    "abort": {
+      "already_configured": "This Flexarr server is already set up.",
+      "reauth_successful": "The new key works."
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "started": "Something started playing",
+      "paused": "Playback paused",
+      "resumed": "Playback resumed",
+      "credits": "The end credits started",
+      "ended": "Playback reached the end",
+      "stopped": "Playback stopped"
+    }
+  }
+}
