@@ -39,5 +39,49 @@
       "ended": "Playback reached the end",
       "stopped": "Playback stopped"
     }
+  },
+  "services": {
+    "set_sound": {
+      "name": "Set sound",
+      "description": "Changes a device's dialogue boost, night mode or speakers. It reaches the device while Flexarr is open on it; anything left out stays as it is.",
+      "fields": {
+        "dialogue_boost": {
+          "name": "Dialogue boost",
+          "description": "Makes voices easier to follow under music and effects."
+        },
+        "night_mode": {
+          "name": "Night mode",
+          "description": "Quietens loud scenes and lifts quiet ones. Scheduled follows the hours set on the device."
+        },
+        "speakers": {
+          "name": "Speakers",
+          "description": "Folds the sound to stereo or 5.1; auto plays every channel the device's output takes."
+        }
+      }
+    }
+  },
+  "selector": {
+    "dialogue_boost": {
+      "options": {
+        "off": "Off",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      }
+    },
+    "night_mode": {
+      "options": {
+        "off": "Off",
+        "on": "On",
+        "scheduled": "On a schedule"
+      }
+    },
+    "speakers": {
+      "options": {
+        "auto": "Auto",
+        "stereo": "Stereo",
+        "surround": "5.1"
+      }
+    }
   }
 }

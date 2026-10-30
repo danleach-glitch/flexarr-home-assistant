@@ -17,6 +17,10 @@ class FlexarrAuthError(FlexarrError):
     """The API key was refused."""
 
 
+class FlexarrNotOpenError(FlexarrError):
+    """The device is signed in, but Flexarr isn't open on it to take the command."""
+
+
 class FlexarrClient:
     """Talks to one Flexarr server with its API key."""
 
@@ -36,6 +40,8 @@ class FlexarrClient:
             ) as response:
                 if response.status in (401, 403):
                     raise FlexarrAuthError(await response.text())
+                if response.status == 409:
+                    raise FlexarrNotOpenError(await response.text())
                 if response.status >= 400:
                     raise FlexarrError(f"{method} {path}: {response.status} {await response.text()}")
                 if response.status == 204 or response.content_length == 0:
@@ -59,6 +65,13 @@ class FlexarrClient:
     async def command(self, device_id: str, command: str) -> None:
         """Pauses, resumes or stops a device ("pause", "resume", "stop")."""
         await self._request("POST", f"/devices/{device_id}/{command}")
+
+    async def sound(
+        self, device_id: str, dialogue_boost: str | None = None, night_mode: str | None = None, speakers: str | None = None
+    ) -> None:
+        """Changes a device's sound settings (Flexarr 0.56 and later). Anything left out stays as it is."""
+        body = {"dialogueBoost": dialogue_boost, "nightMode": night_mode, "speakers": speakers}
+        await self._request("POST", f"/devices/{device_id}/sound", {key: value for key, value in body.items() if value})
 
     def image_url(self, path: str | None) -> str | None:
         """An artwork path from the API as a full address."""

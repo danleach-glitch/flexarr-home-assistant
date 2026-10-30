@@ -4,12 +4,14 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
 
+import pytest
 from homeassistant import config_entries
 from homeassistant.components import automation
 from homeassistant.components.media_player import ATTR_MEDIA_CONTENT_ID, ATTR_MEDIA_CONTENT_TYPE, ATTR_MEDIA_TITLE
 from homeassistant.const import ATTR_ENTITY_ID, CONF_API_KEY, CONF_URL
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr
 from homeassistant.setup import async_setup_component
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_capture_events
@@ -69,6 +71,22 @@ async def test_a_device_is_a_media_player(hass: HomeAssistant, flexarr: FakeFlex
         blocking=True,
     )
     assert flexarr.played == [("tv1", "item-show")]
+
+
+async def test_set_sound_changes_a_devices_sound(hass: HomeAssistant, flexarr: FakeFlexarr, entry: MockConfigEntry) -> None:
+    await _set_up(hass, entry)
+
+    await hass.services.async_call(
+        DOMAIN, "set_sound", {ATTR_ENTITY_ID: PLAYER, "night_mode": "on", "dialogue_boost": "high"}, blocking=True
+    )
+    assert flexarr.sounds == [("tv1", {"dialogue_boost": "High", "night_mode": "On", "speakers": None})]
+
+    # Nothing to change, or Flexarr closed on the TV: said plainly rather than failing quietly.
+    with pytest.raises(HomeAssistantError):
+        await hass.services.async_call(DOMAIN, "set_sound", {ATTR_ENTITY_ID: PLAYER}, blocking=True)
+    flexarr.closed.add("tv1")
+    with pytest.raises(HomeAssistantError, match="isn't open"):
+        await hass.services.async_call(DOMAIN, "set_sound", {ATTR_ENTITY_ID: PLAYER, "speakers": "stereo"}, blocking=True)
 
 
 async def test_nothing_playing_is_idle_and_closed_is_off(hass: HomeAssistant, flexarr: FakeFlexarr, entry: MockConfigEntry) -> None:

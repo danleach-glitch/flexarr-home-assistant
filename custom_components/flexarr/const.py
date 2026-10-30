@@ -8,6 +8,11 @@ DOMAIN: Final = "flexarr"
 # Fired on Home Assistant's event bus for every playback change Flexarr reports.
 EVENT_PLAYBACK: Final = "flexarr_playback"
 
+# The sound settings a device takes, as Flexarr names them (the set_sound action's choices, lower-cased).
+DIALOGUE_BOOST: Final = ("off", "low", "medium", "high")
+NIGHT_MODE: Final = ("off", "on", "scheduled")
+SPEAKERS: Final = ("auto", "stereo", "surround")
+
 # Flexarr's playback event kinds, as they're named in triggers and in EVENT_PLAYBACK's "type".
 PLAYBACK_EVENTS: Final = ("started", "paused", "resumed", "credits", "ended", "stopped")
 

@@ -47,6 +47,17 @@ Behind them is the `flexarr_playback` event, which also covers browsers. Its dat
 | `media_id` | its Flexarr id |
 | `position`, `duration` | in seconds |
 
+**Sound.** The `flexarr.set_sound` action changes a device's dialogue boost (`off`, `low`, `medium`, `high`), night mode (`off`, `on`, `scheduled`) and speakers (`auto`, `stereo`, `surround`). Anything left out stays as it is. It needs Flexarr 0.56 or later, and reaches a device while Flexarr is open on it; otherwise the action fails, saying so.
+
+```yaml
+action: flexarr.set_sound
+target:
+  entity_id: media_player.living_room_tv
+data:
+  night_mode: "on"
+  dialogue_boost: medium
+```
+
 ## Example: lights down for films
 
 ```yaml
@@ -78,9 +89,28 @@ automation:
         data: { brightness_pct: 80, transition: 10 }
 ```
 
+## Example: night mode after ten
+
+```yaml
+automation:
+  - alias: Night mode for late films
+    triggers:
+      - trigger: event
+        event_type: flexarr_playback
+        event_data: { type: started, device_name: Living room TV }
+    conditions:
+      - condition: time
+        after: "22:00:00"
+        before: "07:00:00"
+    actions:
+      - action: flexarr.set_sound
+        target: { entity_id: media_player.living_room_tv }
+        data: { night_mode: "on" }
+```
+
 ## How it works
 
-The integration keeps `GET /api/v1/events` open (server-sent events: one `playback` event per change) and reconnects if it drops. It fetches `GET /api/v1/devices` every 30 seconds and straight after each event. Commands go to `POST /api/v1/devices/{id}/play`, `pause`, `resume` and `stop`. A playback that stops reporting counts as stopped after two minutes (fifteen if it was paused).
+The integration keeps `GET /api/v1/events` open (server-sent events: one `playback` event per change) and reconnects if it drops. It fetches `GET /api/v1/devices` every 30 seconds and straight after each event. Commands go to `POST /api/v1/devices/{id}/play`, `pause`, `resume`, `stop` and `sound`. A playback that stops reporting counts as stopped after two minutes (fifteen if it was paused).
 
 ## Development
 
