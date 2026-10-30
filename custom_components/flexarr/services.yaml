@@ -1,0 +1,21 @@
+set_sound:
+  target:
+    entity:
+      integration: flexarr
+      domain: media_player
+  fields:
+    dialogue_boost:
+      selector:
+        select:
+          options: ["off", "low", "medium", "high"]
+          translation_key: dialogue_boost
+    night_mode:
+      selector:
+        select:
+          options: ["off", "on", "scheduled"]
+          translation_key: night_mode
+    speakers:
+      selector:
+        select:
+          options: ["auto", "stereo", "surround"]
+          translation_key: speakers

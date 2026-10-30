@@ -11,6 +11,7 @@ import pytest
 from homeassistant.const import CONF_API_KEY, CONF_URL
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.flexarr.api import FlexarrNotOpenError
 from custom_components.flexarr.const import DOMAIN
 
 URL = "http://flexarr.test:8383"
@@ -56,7 +57,14 @@ class FakeFlexarr:
         self.device_list: list[dict[str, Any]] = [heat()]
         self.commands: list[tuple[str, str]] = []
         self.played: list[tuple[str, str]] = []
+        self.sounds: list[tuple[str, dict[str, str | None]]] = []
+        self.closed: set[str] = set()
         self.queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
+
+    async def sound(self, device: str, **settings: str | None) -> None:
+        if device in self.closed:
+            raise FlexarrNotOpenError("Flexarr isn't open")
+        self.sounds.append((device, settings))
 
     async def events(self) -> AsyncIterator[dict[str, Any]]:
         while True:
@@ -77,6 +85,7 @@ def flexarr() -> FakeFlexarr:
             "custom_components.flexarr.api.FlexarrClient.play",
             AsyncMock(side_effect=lambda device, item, from_beginning=False: fake.played.append((device, item)) or {}),
         ),
+        patch("custom_components.flexarr.api.FlexarrClient.sound", AsyncMock(side_effect=fake.sound)),
         patch("custom_components.flexarr.api.FlexarrClient.events", lambda self: fake.events()),
     ):
         yield fake
