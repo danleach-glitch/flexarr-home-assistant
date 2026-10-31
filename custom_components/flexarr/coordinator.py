@@ -117,4 +117,6 @@ def media_type(kind: str | None) -> str | None:
         "Album": "album",
         "Podcast": "podcast",
         "PodcastEpisode": "podcast",
+        # Home Assistant has no audiobook type: a book plays like music, its chapter the title and the book the album.
+        "Audiobook": "music",
     }.get(kind or "")

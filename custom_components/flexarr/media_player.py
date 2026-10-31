@@ -91,11 +91,25 @@ class FlexarrPlayer(CoordinatorEntity[FlexarrCoordinator], MediaPlayerEntity):
         return media_type(self._item.get("kind"))
 
     @property
+    def _book(self) -> dict[str, Any] | None:
+        """A book's authors, narrator and series (servers from 0.58)."""
+        return self._item.get("book") if self._item.get("kind") == "Audiobook" else None
+
+    @property
     def media_title(self) -> str | None:
+        # A book shows its chapter, with the book as the album.
+        if self._book is not None and (chapter := (self._playing or {}).get("chapter")):
+            return chapter
         return self._item.get("title")
 
     @property
+    def media_album_name(self) -> str | None:
+        return self._item.get("title") if self._book is not None else None
+
+    @property
     def media_series_title(self) -> str | None:
+        if (book := self._book) is not None:
+            return book.get("series")
         return self._item.get("seriesTitle")
 
     @property
@@ -110,6 +124,8 @@ class FlexarrPlayer(CoordinatorEntity[FlexarrCoordinator], MediaPlayerEntity):
 
     @property
     def media_artist(self) -> str | None:
+        if (book := self._book) is not None:
+            return book.get("authors")
         return self._item.get("trackArtist")
 
     @property
@@ -125,7 +141,10 @@ class FlexarrPlayer(CoordinatorEntity[FlexarrCoordinator], MediaPlayerEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         device = self._device or {}
-        return {"profile": device.get("profileName"), "flexarr_device_id": self.device_id}
+        attributes = {"profile": device.get("profileName"), "flexarr_device_id": self.device_id}
+        if (book := self._book) is not None:
+            attributes["narrator"] = book.get("narrator")
+        return attributes
 
     def _update_position(self) -> None:
         position = (self._playing or {}).get("positionSeconds")
