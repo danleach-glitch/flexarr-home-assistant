@@ -71,6 +71,34 @@ async def test_a_device_is_a_media_player(hass: HomeAssistant, flexarr: FakeFlex
     assert flexarr.played == [("tv1", "item-show")]
 
 
+async def test_a_book_plays_like_music_with_its_chapter_as_the_title(
+    hass: HomeAssistant, flexarr: FakeFlexarr, entry: MockConfigEntry
+) -> None:
+    book = {
+        "id": "item-tmc",
+        "kind": "Audiobook",
+        "title": "The Thursday Murder Club",
+        "artwork": {},
+        "book": {
+            "authors": "Richard Osman",
+            "authorCount": 1,
+            "narrator": "Lesley Manville",
+            "series": "Thursday Murder Club",
+            "sequence": "1",
+        },
+    }
+    flexarr.device_list = [{**heat(), "nowPlaying": {**heat()["nowPlaying"], "item": book, "chapter": "Chapter 12"}}]
+    await _set_up(hass, entry)
+
+    state = hass.states.get(PLAYER)
+    assert state.attributes[ATTR_MEDIA_CONTENT_TYPE] == "music"
+    assert state.attributes[ATTR_MEDIA_TITLE] == "Chapter 12"
+    assert state.attributes["media_album_name"] == "The Thursday Murder Club"
+    assert state.attributes["media_artist"] == "Richard Osman"
+    assert state.attributes["media_series_title"] == "Thursday Murder Club"
+    assert state.attributes["narrator"] == "Lesley Manville"
+
+
 async def test_nothing_playing_is_idle_and_closed_is_off(hass: HomeAssistant, flexarr: FakeFlexarr, entry: MockConfigEntry) -> None:
     flexarr.device_list = [{**heat(), "nowPlaying": None}]
     await _set_up(hass, entry)
