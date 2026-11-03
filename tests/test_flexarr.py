@@ -155,3 +155,16 @@ async def test_the_player_follows_events_without_waiting_for_a_fetch(
         await flexarr.queue.put({"kind": "Stopped", "deviceId": "tv1", "item": item, "positionSeconds": 3710.0, "durationSeconds": 10200.0})
         await hass.async_block_till_done()
         assert hass.states.get(PLAYER).state == "idle"
+
+
+async def test_a_malformed_event_doesnt_stop_the_listener(hass: HomeAssistant, flexarr: FakeFlexarr, entry: MockConfigEntry) -> None:
+    await _set_up(hass, entry)
+    fired = async_capture_events(hass, EVENT_PLAYBACK)
+    item = heat()["nowPlaying"]["item"]
+    with patch("custom_components.flexarr.coordinator.FlexarrCoordinator.async_request_refresh", AsyncMock()):
+        await flexarr.queue.put({"deviceId": "tv1", "item": item})
+        await flexarr.queue.put({"kind": None, "deviceId": "tv1"})
+        await flexarr.queue.put({"kind": "Paused", "deviceId": "tv1", "item": item, "positionSeconds": 3700.0, "durationSeconds": 10200.0})
+        await hass.async_block_till_done()
+    assert [event.data["type"] for event in fired] == ["paused"]
+    assert hass.states.get(PLAYER).state == "paused"
