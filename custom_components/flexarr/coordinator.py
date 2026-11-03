@@ -45,6 +45,9 @@ class FlexarrCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             try:
                 async for event in self.client.events():
                     failures = 0
+                    if not isinstance(event.get("kind"), str):
+                        _LOGGER.debug("Skipping a playback event without a kind: %s", event)
+                        continue
                     self._fire(event)
                     self._apply(event)
                     # The rest (who's online) on the next fetch; refreshes are throttled to one every ten seconds.
@@ -64,7 +67,7 @@ class FlexarrCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         flexarr_device = event.get("deviceId")
         if not self.data or flexarr_device not in self.data:
             return
-        kind = str(event["kind"]).lower()
+        kind = event["kind"].lower()
         device = dict(self.data[flexarr_device])
         if kind == "stopped":
             # Only if it's this playback that stopped: the next episode may already have started.
@@ -87,7 +90,7 @@ class FlexarrCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         self.hass.bus.async_fire(
             EVENT_PLAYBACK,
             {
-                "type": str(event["kind"]).lower(),
+                "type": event["kind"].lower(),
                 # The Home Assistant device, for device triggers; None for a browser, which isn't one.
                 "device_id": device.id if device else None,
                 "flexarr_device_id": flexarr_device,

@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import AsyncIterator
 from typing import Any
 
 import aiohttp
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class FlexarrError(Exception):
@@ -81,10 +84,19 @@ class FlexarrClient:
                     raise FlexarrError(f"GET /events: {response.status}")
                 event, data = None, []
                 async for raw in response.content:
-                    line = raw.decode("utf-8").rstrip("\r\n")
+                    line = raw.decode("utf-8", errors="replace").rstrip("\r\n")
                     if not line:
                         if event == "playback" and data:
-                            yield json.loads("\n".join(data))
+                            # One bad event is skipped, not allowed to end the stream.
+                            try:
+                                payload = json.loads("\n".join(data))
+                            except ValueError:
+                                _LOGGER.debug("Skipping a playback event that isn't JSON: %s", data)
+                            else:
+                                if isinstance(payload, dict) and isinstance(payload.get("kind"), str):
+                                    yield payload
+                                else:
+                                    _LOGGER.debug("Skipping a playback event without a kind: %s", payload)
                         event, data = None, []
                     elif line.startswith(":"):
                         continue
